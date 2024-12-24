@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Sudoku Solver</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+        text-align: center;
+      }
+      .image-container {
+        margin-top: 20px;
+        max-width: 800px;
+        margin: 20px auto;
+      }
+      #result-image {
+        max-width: 100%;
+        height: auto;
+        border: 2px solid #333;
+        border-radius: 8px;
+        display: none;
+      }
+      .error {
+        color: red;
+        margin-top: 10px;
+      }
+      .loading {
+        display: none;
+        margin: 20px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Sudoku Solver</h1>
+    <input type="file" id="image-input" accept="image/*">
+    <div class="loading" id="loading">Processing...</div>
+    <div class="image-container">
+      <img id="result-image" alt="Result" />
+    </div>
+    <p id="error" class="error"></p>
+
+    <script>
+      document.getElementById('image-input').addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const loading = document.getElementById('loading');
+        const error = document.getElementById('error');
+        const resultImage = document.getElementById('result-image');
+
+        loading.style.display = 'block';
+        error.textContent = '';
+        resultImage.style.display = 'none';
+
+        const formData = new FormData();
+        formData.append('image', file);
+
+        try {
+          const response = await fetch('/solve', {
+            method: 'POST',
+            body: formData
+          });
+          const data = await response.json();
+
+          if (data.error) {
+            error.textContent = data.error;
+          } else {
+            resultImage.src = 'data:image/jpeg;base64,' + data.image;
+            resultImage.style.display = 'block';
+          }
+        } catch (err) {
+          error.textContent = 'Error processing image';
+        } finally {
+          loading.style.display = 'none';
+        }
+      });
+    </script>
+  </body>
+</html>
